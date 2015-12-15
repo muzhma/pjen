@@ -19,10 +19,23 @@ website
 ```
 Only the **templates** directory is used by **pjen**, the others are there for your convenience.
 
-**pjen** works by iterating through each directoy, which can have any name, within the **templates** directory. Each directory needs to have a file called **templates.html**. This file is a normal html file, but can have the following tags:
+Each template needs to be called **template.html** to be stored in it's own directory, which can have an arbitary name. The inputs for each template are to be stored in the same directory as the template. The input file name will be the name of the generated page.
+
+If a template directory has the following structure: 
+```
+blog
+  |-> template.html
+  |-> article1.html
+  |-> article2.html
+```
+When the generator is run, it will create the files **article1.html** and **article2.html** within the **website** directory.
+
+The **template.html** file is a normal html file but can contain any of the following tags:
 
 ```
 {{ css }}
 {{ html }}
 {{ scripts }}
 ```
+
+These tags will be replaced with the contents following the tags in the input files.
