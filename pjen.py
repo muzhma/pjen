@@ -24,7 +24,7 @@ class pjen:
 
 		website
 		  |-> templates
-			  |-> template_###
+			  |-> group1
   	      |-> images
 		  |-> scss
 	      |-> css
@@ -38,7 +38,7 @@ class pjen:
 			os.makedirs(self.path)
 
 			os.makedirs(self.path+"/templates")
-			os.makedirs(self.path+"/templates/template_###")			
+			os.makedirs(self.path+"/templates/group1")			
 			os.makedirs(self.path+"/images")
 			os.makedirs(self.path+"/scss")
 			os.makedirs(self.path+"/css")
