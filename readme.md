@@ -51,6 +51,6 @@ These tags will be replaced with the contents following the tags in the input fi
 
 TODO:
 
--[ ] Deal with empty lines within template input files
--[ ] Specify name of project
--[ ] Ability to add multiple of each type/custom tags
+- [ ] Deal with empty lines within template input files
+- [ ] Specify name of project
+- [ ] Ability to add multiple of each type/custom tags
