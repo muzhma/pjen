@@ -31,13 +31,13 @@ blog
   |-> article2.html
 ```
 
-The generator is run using the following commands:
+and the generator is run using the following commands:
 ```
 p = pjen()
 p.generate()
 ```
 
-When the generator is run, it will create the files **article1.html** and **article2.html** within the **website** directory.
+then the files **article1.html** and **article2.html** will be created within the **website** directory.
 
 The **template.html** file is a normal html file but can contain any of the following tags:
 
@@ -50,6 +50,7 @@ The **template.html** file is a normal html file but can contain any of the foll
 These tags will be replaced with the contents following the tags in the input files, with the indentation matched.
 
 TODO:
-[ ] Deal with empty lines within template input files
-[ ] Specify name of project
-[ ] Ability to add multiple of each type/custom tags
+
+-[ ] Deal with empty lines within template input files
+-[ ] Specify name of project
+-[ ] Ability to add multiple of each type/custom tags
