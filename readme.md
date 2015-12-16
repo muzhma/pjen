@@ -50,7 +50,7 @@ The **template.html** file is a normal html file but can contain any of the foll
 These tags will be replaced with the contents following the tags in the input files, with the indentation matched.
 
 TODO:
-
+- [x] Ability to overwrite existing file structure
 - [ ] Deal with empty lines within template input files
-- [ ] Specify name of project
+- [x] Specify name of project
 - [ ] Ability to add multiple of each type/custom tags
