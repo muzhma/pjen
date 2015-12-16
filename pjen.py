@@ -1,28 +1,29 @@
 import os
 
 class pjen:
-	def __init__(self, path=None):
+	def __init__(self, name=None, path=None):
 		"""
 		By default, the path will be set to the current working directory, 
 		or the path can be specified using the 'path' keyword parameter.
+
+		By default, the name of the project will be set to 'website', 
+		or can be specified using the 'name' keyword parameter.
 		"""
 
-		if path is None:
-			self.path = os.getcwd() 
-		else:
-			self.path = path
+		#if a path has been supplied use it, or else use the current working directory
+		self.path = path if path else os.getcwd()
 
-		self.path += "/website"
+		#if a name has been supplied append it to the path, or else use the default "/website"
+		self.path += ("/" + name) if name else "/website"
 
 	def create_project(self):
 		"""
 		Creates an initial file structure for a project at the specified path. 
-
 		An exception is raised if a project already exists in the desired location.
 
 		Creates the following file structure:
 
-		website
+		website/'name'
 		  |-> templates
 			  |-> group1
   	      |-> images
@@ -191,6 +192,7 @@ class pjen:
 
 
 if __name__ == "__main__":
-	p = pjen()
-	p.generate()
+	p = pjen(name = "test")
+	p.create_project()
+	#p.generate()
 
