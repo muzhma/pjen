@@ -1,4 +1,6 @@
 import os
+import shutil
+import sys
 
 class pjen:
 	def __init__(self, name=None, path=None):
@@ -16,11 +18,8 @@ class pjen:
 		#if a name has been supplied append it to the path, or else use the default "/website"
 		self.path += ("/" + name) if name else "/website"
 
-	def create_project(self):
+	def _create_file_structure(self, overwrite=False):
 		"""
-		Creates an initial file structure for a project at the specified path. 
-		An exception is raised if a project already exists in the desired location.
-
 		Creates the following file structure:
 
 		website/'name'
@@ -31,25 +30,52 @@ class pjen:
 	      |-> css
 	      |-> scripts
 
+	    If overwrite=True then any existing file structe will be overwritten.  
 		"""
 
-		if not os.path.exists(self.path):
+		#if overwrite=True then remove the existing files
+		if overwrite:
+			shutil.rmtree(self.path)
 
-			#make the root directory
-			os.makedirs(self.path)
+		project_folders = (
+			"/templates/group1",
+			"/images",
+			"/scss",
+			"/css",
+			"/scripts",
+        )
 
-			os.makedirs(self.path+"/templates")
-			os.makedirs(self.path+"/templates/group1")			
-			os.makedirs(self.path+"/images")
-			os.makedirs(self.path+"/scss")
-			os.makedirs(self.path+"/css")
-			os.makedirs(self.path+"/scripts")
+		for folder in project_folders:
+			os.makedirs(self.path + folder)
 
-			print("Created project in {}".format(self.path))
+		print("Created project in {}".format(self.path))
 
+	def create_project(self):
+		"""
+		Creates the initial file structure for a project. If a directory already exists
+		at the location then it will ask if the user wants to overwrite the existing directory. 
+		"""
+
+		#check if a project already exists, if so give option to overwrite
+		if os.path.exists(self.path):
+
+			print("A directory already exists at: {}".format(self.path))
+			response = raw_input("Do you want to overwrite? (y/n)\n")
+
+			if response == "y" or response == "Y":
+				print("Overwriting existing file structure")
+				self._create_file_structure(overwrite=True)
+
+			elif response == "n" or response == "N":
+				print("Exiting...")
+				sys.exit()
+
+			else:
+				print("Not a valid input. Exiting...")
+
+		#if there is no existing project then create one.
 		else:
-			raise IOError("A directory already exists at: {}".format(self.path))
-
+			self._create_file_structure()
 
 	def _count_indent(self, str, tab_equiv=4):
 		"""
@@ -70,20 +96,17 @@ class pjen:
 
 		return count
 
-	def _sanatise_file_list(self, l, fname=None):
+	def _sanatise_file_list(self, file_list, fname=None):
 		"""
-		Removes blacklisted files from the input list 'l'. In addition, a file with 
+		Removes blacklisted files from the input list 'file_list'. In addition, a file with 
 		the name 'fname' can also be removed.
 		"""
 
-		blacklist = [".DS_Store"]
-
-		if fname:
-			blacklist.append(fname)
+		blacklist = (".DS_Store", fname)
 
 		for item in blacklist:
 			try:
-				l.pop(l.index(item))
+				file_list.remove(file_list.index(item))
 			except ValueError:
 				pass
 
@@ -192,7 +215,7 @@ class pjen:
 
 
 if __name__ == "__main__":
-	p = pjen(name = "test")
+	p = pjen(name = "test1")
 	p.create_project()
 	#p.generate()
 
