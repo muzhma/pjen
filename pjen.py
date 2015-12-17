@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+import re
 
 class pjen:
 	def __init__(self, name=None, path=None):
@@ -22,7 +23,7 @@ class pjen:
 		"""
 		Creates the following file structure:
 
-		website/'name'
+		[website or the specified name]
 		  |-> templates
 			  |-> group1
   	      |-> images
@@ -77,7 +78,7 @@ class pjen:
 		else:
 			self._create_file_structure()
 
-	def _count_indent(self, str, tab_equiv=4):
+	def _count_indent(self, string, tab_equiv=4):
 		"""
 		Returns the number of leading spaces. A tab is counted as 'tab_equiv' spaces.
 		"""
@@ -85,11 +86,11 @@ class pjen:
 		i = 0
 		count = 0
 
-		while(str[i] == " " or str[i] == "\t"):
+		while(string[i] == " " or string[i] == "\t"):
 
-			if str[i] == " ":
+			if string[i] == " ":
 				count += 1
-			if str[i] == "\t":
+			elif string[i] == "\t":
 				count += 4
 
 			i += 1
@@ -106,9 +107,83 @@ class pjen:
 
 		for item in blacklist:
 			try:
-				file_list.remove(file_list.index(item))
+				file_list.remove(item)
 			except ValueError:
 				pass
+
+	def _extract_tag_data(self, f):
+		"""
+		Extracts the tag data from the file 'f'.
+
+		Returns a dictionary of tag data. The keys are the names of the tags and the corresponding values are lists of lines,
+		with empty lines removed from the start and end of the lists.
+
+		For example:
+
+		For a file that contains the following (note: period/full-stop represents a whitespace character):
+
+			.\n
+			.\n
+			<div>
+			....<p>This is a paragraph</p>
+			</div>
+			.\n
+		
+
+		the dictionary returned will be as follows:
+
+		{ "html" : ["<div>", "....<p>This is a paragraph</p>", "</div>"] }
+
+		"""
+
+		#dictionary to store data
+		tag_data = {}
+
+		#flag to determine the section of the input file
+		tag = None
+
+		#iterate through the input file and set the appropriate flag
+		for line in f.readlines():
+
+			#look for tags
+			match = re.search("\{\{(.*?)\}\}", line)
+
+			#if there is a tag
+			if match:
+
+				#extract the tag name
+				tag = re.search("(\w)+", match.group(0)).group(0)
+
+				#add an empty string to the dictionary
+				tag_data[tag] = ""
+
+			#not a tag line
+			else:
+
+				#ensure that the line is actually within a tag's section
+				if tag:
+					tag_data[tag] += line
+
+		#split the data for each tag into a list of lines
+		for key in tag_data.keys():
+			tag_data[key] = [line + "\n" for line in tag_data[key].split("\n")]
+
+			#remove any empty lines from the start and end of the tag data
+			i = 0
+			while tag_data[key][i].isspace() is True:
+				i += 1
+
+			j = -1
+			while tag_data[key][j].isspace() is True:
+				j -= 1
+
+			if i > 0:
+				tag_data[key] = tag_data[key][i:]
+
+			if j<-1:
+				tag_data[key] = tag_data[key][:j+1]
+
+		return tag_data
 
 	def generate(self):
 		"""
@@ -143,32 +218,10 @@ class pjen:
 						print("Generating file: {}".format(f))
 
 						#open up the input
-						with open(self.path + "/templates/" + group + "/" + f, "r") as my_input:
+						with open(self.path + "/templates/" + group + "/" + f, "r") as template_input:
 
-							#iterate through the input and extract the various sections
-							css = ""
-							html = ""
-							scripts = ""
-
-							#flag to determine the section of the input file
-							in_section = None
-
-							#iterate through the input file and set the appropriate flag
-							for line in my_input.readlines():
-								if line.lstrip().startswith("{{ css }}"):
-									in_section = "css"
-								elif line.lstrip().startswith("{{ html }}"):
-									in_section = "html"
-								elif line.lstrip().startswith("{{ scripts }}"):
-									in_section = "scripts"
-								else:
-									if in_section == "css":
-										css += line
-									if in_section == "html":
-										html += line
-									if in_section == "scripts":
-										scripts += line
-
+							#extract the tag data from the template input
+							tag_data = self._extract_tag_data(template_input)
 
 							#reset the file pointer as the template can be read many times
 							template.seek(0)
@@ -176,38 +229,24 @@ class pjen:
 							#iterate through the template file
 							for line in template.readlines():
 
-								if line.lstrip().startswith("{{ css }}"):
+								#look for tags
+								match = re.search("\{\{(.*?)\}\}", line)
 
-									indent = self._count_indent(line)
+								#if there is a tag
+								if match:
 
-									#if there is css in the input file then insert it
-									if css != "":
+									#extract the tag name
+									tag = re.search("(\w)+", match.group(0)).group(0)
 
-										for insert_line in [x + "\n" for x in css.split("\n")]:
+									#check if there is data to be inserted for this tag
+									if tag in tag_data.keys():
 
-											page.write(" "*indent + insert_line)
+										indent = self._count_indent(line)
 
-								#if there is html in the input file then insert it
-								elif line.lstrip().startswith("{{ html }}"):
-
-									indent = self._count_indent(line)
-
-									if html != "":
-
-										for insert_line in [x + "\n" for x in html.split("\n")]:
+										for insert_line in tag_data[tag]:
 
 											page.write(" "*indent + insert_line)
 
-								#if there are script links in the input file then insert them
-								elif line.lstrip().startswith("{{ scripts }}"):
-
-									indent = self._count_indent(line)
-
-									if scripts != "":
-
-										for insert_line in [x + "\n" for x in scripts.split("\n")]:
-
-											page.write(" "*indent + insert_line)
 
 								#otherwise copy the template text
 								else:
@@ -215,7 +254,7 @@ class pjen:
 
 
 if __name__ == "__main__":
-	p = pjen(name = "test1")
-	p.create_project()
-	#p.generate()
+	p = pjen()
+	#p.create_project()
+	p.generate()
 
