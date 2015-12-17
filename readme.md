@@ -39,18 +39,17 @@ p.generate()
 
 then the files **article1.html** and **article2.html** will be created within the **website** directory.
 
-The **template.html** file is a normal html file but can contain any of the following tags:
+The **template.html** file is a normal html file but can contain tags of the form:
 
 ```
-{{ css }}
-{{ html }}
-{{ scripts }}
+{{ tag_name }}
 ```
+Where the tag names must consist of letters, numbers or underscores only and be unique.
 
-These tags will be replaced with the contents following the tags in the input files, with the indentation matched.
+These tags will be replaced with the contents following the matching tags in the input files, with the indentation matched.
 
 TODO:
 - [x] Ability to overwrite existing file structure
-- [ ] Deal with empty lines within template input files
+- [x] Deal with empty lines within template input files
 - [x] Specify name of project
-- [ ] Ability to add multiple of each type/custom tags
+- [x] Ability to add multiple of each type/custom tags

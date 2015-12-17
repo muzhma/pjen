@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+import re
 
 class pjen:
 	def __init__(self, name=None, path=None):
@@ -111,32 +112,55 @@ class pjen:
 				pass
 
 	def _extract_tag_data(self, f):
+		"""
+		Extracts the tag data from the file 'f'.
 
-		#iterate through the input and extract the various sections
-		tag_data = {
-			"css" : "",
-			"html" : "",
-			"scripts" : "",
-		}
+		Returns a dictionary of tag data. The keys are the names of the tags and the values are lists of lines, with empty
+		lines removed from the start and end of the lists.
+
+		For example:
+
+		For a file that contains the follwing (note: period/full-stop represents a whitespace character):
+
+			.\n
+			.\n
+			<div>
+			....<p>This is a paragraph</p>
+			</div>
+			.\n
+		
+
+		the dictionary below will be returned:
+
+		{ "html" : ["<div>", "....<p>This is a paragraph</p>", "</div>"] }
+
+		"""
+
+		#dictionary to store data
+		tag_data = {}
 
 		#flag to determine the section of the input file
-		in_section = None
+		tag = None
 
 		#iterate through the input file and set the appropriate flag
 		for line in f.readlines():
-			if line.lstrip().startswith("{{ css }}"):
-				in_section = "css"
-			elif line.lstrip().startswith("{{ html }}"):
-				in_section = "html"
-			elif line.lstrip().startswith("{{ scripts }}"):
-				in_section = "scripts"
+
+			#look for tags
+			match = re.search("\{\{(.*?)\}\}", line)
+
+			#if there is a tag
+			if match:
+
+				#extract the tag name
+				tag = re.search("(\w)+", match.group(0)).group(0)
+
+				#add an empty string to the dictionary
+				tag_data[tag] = ""
+
 			else:
-				if in_section == "css":
-					tag_data["css"] += line
-				if in_section == "html":
-					tag_data["html"] += line
-				if in_section == "scripts":
-					tag_data["scripts"] += line
+
+				if tag:
+					tag_data[tag] += line
 
 		#split the data for each tag into a list of lines
 		for key in tag_data.keys():
@@ -151,7 +175,11 @@ class pjen:
 			while tag_data[key][j].isspace() is True:
 				j -= 1
 
-			tag_data[key] = tag_data[key][i:j+1]
+			if i > 0:
+				tag_data[key] = tag_data[key][i:]
+
+			if j<-1:
+				tag_data[key] = tag_data[key][:j+1]
 
 		return tag_data
 
@@ -199,13 +227,17 @@ class pjen:
 							#iterate through the template file
 							for line in template.readlines():
 
-								match_found = False
+								#look for tags
+								match = re.search("\{\{(.*?)\}\}", line)
 
-								for tag in tag_data.keys():
+								#if there is a tag
+								if match:
 
-									if line.lstrip().startswith("{{ " + tag + " }}"):
+									#extract the tag name
+									tag = re.search("(\w)+", match.group(0)).group(0)
 
-										match_found = True
+									#check if there is data to be inserted for this tag
+									if tag in tag_data.keys():
 
 										indent = self._count_indent(line)
 
@@ -215,7 +247,7 @@ class pjen:
 
 
 								#otherwise copy the template text
-								if not match_found:
+								else:
 									page.write(line)
 
 
