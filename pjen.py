@@ -23,7 +23,7 @@ class pjen:
 		"""
 		Creates the following file structure:
 
-		website/'name'
+		[website or the specified name]
 		  |-> templates
 			  |-> group1
   	      |-> images
@@ -115,12 +115,12 @@ class pjen:
 		"""
 		Extracts the tag data from the file 'f'.
 
-		Returns a dictionary of tag data. The keys are the names of the tags and the values are lists of lines, with empty
-		lines removed from the start and end of the lists.
+		Returns a dictionary of tag data. The keys are the names of the tags and the corresponding values are lists of lines,
+		with empty lines removed from the start and end of the lists.
 
 		For example:
 
-		For a file that contains the follwing (note: period/full-stop represents a whitespace character):
+		For a file that contains the following (note: period/full-stop represents a whitespace character):
 
 			.\n
 			.\n
@@ -130,7 +130,7 @@ class pjen:
 			.\n
 		
 
-		the dictionary below will be returned:
+		the dictionary returned will be as follows:
 
 		{ "html" : ["<div>", "....<p>This is a paragraph</p>", "</div>"] }
 
@@ -157,8 +157,10 @@ class pjen:
 				#add an empty string to the dictionary
 				tag_data[tag] = ""
 
+			#not a tag line
 			else:
 
+				#ensure that the line is actually within a tag's section
 				if tag:
 					tag_data[tag] += line
 
